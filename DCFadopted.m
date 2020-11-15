@@ -1,3 +1,11 @@
+%% 11 November 2020
+% Institute: University of Cape Town 
+% Course: EEE4022s
+% Name: Nadir Mahomed
+% Student Number: ABBNAD002
+% Supervisor: Dr M.Y. Abdul Gaffar
+%% ---------------------------------------------------------------DCF adapted EMC-ATWS-----------------------------------------------------------------
+
 clear all;
 close all;
 
@@ -10,7 +18,7 @@ c = 299792458;
 % % Tigress_TURN_1_P728_B1_STC76_HRR : Checked
 % % Tigress_TURN_2_P728_B1_STC76_HRR : Checked
 %
-EsperanceDataset = load('Tigress_INB_1_P727_B1_STC88_HRR');
+EsperanceDataset = load('Esp_CAP77-58INB_1_P728_B1_STC76_HRR ');
 %EsperanceDataset = load('Esp_CAP77-51TURN_1min_rev_1_P728_B1_STC76_HRR');
 % Obtain the relevant data from the Esperance Dataset
 RadarDataset.HRR_profiles = EsperanceDataset.Settings.HRR.HRR_calib_velcomppeak_win.';
@@ -25,7 +33,7 @@ WindowMatrix = EsperanceDataset.Settings.HRR.Win_Func;
 sb_Calib_Matrix =  EsperanceDataset.Settings.HRR.corr_filter_vector;
 
 HRR_profiles = ifft(EsperanceDataset.Settings.HRR.TgtBin_velcomp_peak.*WindowMatrix.*sb_Calib_Matrix).';
-%HRR_profiles = HRR_profiles(185:587,:);
+HRR_profiles = HRR_profiles(185:587,:);
 xaxis = RadarDataset.Range_axis;
 yaxis = (1:1:size(RadarDataset.HRR_profiles,1));
 % Dataset = load('Altera_CWLFM_Dataset.mat');
@@ -35,8 +43,8 @@ yaxis = (1:1:size(RadarDataset.HRR_profiles,1));
 
 N = size(HRR_profiles,2);
 M = size(HRR_profiles,1);
-window_range = [0.5,0.8,1.6];         %[0.2,0.45,0.75,1.2]
-for range = 1:3
+window_range = [0.3,0.5];         %[0.2,0.45,0.75,1.2]
+for range = 1:2
     window = window_range(range);
     fs = 154;
     PRF = fs;
@@ -47,7 +55,7 @@ for range = 1:3
     win = kaiser(CPTWL);        % Window Function
     factor = 0.75;               % Overlap factor
     overlap = factor*CPTWL;     % Overlap samples
-    polyorder = 3;
+    polyorder = 2;
     n = 6;
     wlen = length(win);
     f = (wlen/2:1:(wlen/2-1))*fs/wlen;
@@ -191,7 +199,7 @@ for i = 1:size(Optimum_matrix,2)
     zero_doppler = size(B,1)/2;
     negative_freqs = sum(20*log10(B(zero_doppler-B_zdt:zero_doppler,energy_cell_index)));
     positive_freqs = sum(20*log10(B(zero_doppler:zero_doppler+B_zdt,energy_cell_index)));
-    E_threshold = 350%dB;
+    E_threshold = 0%dB;
     Energy_test = abs(negative_freqs - positive_freqs)
     if Energy_test < E_threshold
         Optimum_matrix(4,index_1) = 0;
@@ -209,7 +217,7 @@ for i = 1:size(Optimum_matrix,2)
     f = (-wlen/2:1:(wlen/2-1))*PRF/wlen;
     figure;
     imagesc(Range_axis,f,20*log10(abs(ISAR_new)));
-    title(sprintf("Image Rank = %0.5g, CenterTime = %0.5g s,  \n Entropy = %0.5g ,Contrast = %0.5g, \n Optimum CPTWL = %0.5g, Initial CPTWL = %0.5g ",counter,CentreProfile_time, Optimum_matrix(4,index_1), Contrast, CPTWL,roundn(Optimum_matrix(5,index_1)*1/PRF,-2))); % Abdul Gaffar
+    title(sprintf("Tau = %0.5g s ,Contrast = %0.5g, \n Optimum CPTWL = %0.5g, Initial CPTWL = %0.5g ",0.68, Contrast, 0.43,roundn(Optimum_matrix(5,index_1)*1/PRF,-2))); % Abdul Gaffar
     colormap(flipud(gray));
     ylabel('Doppler Frequency (Hz)');
     xlabel('Range (m)');

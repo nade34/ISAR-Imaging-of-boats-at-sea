@@ -1,3 +1,10 @@
+%% 11 November 2020
+% Institute: University of Cape Town 
+% Course: EEE4022s
+% Name: Nadir Mahomed
+% Student Number: ABBNAD002
+% Supervisor: Dr M.Y. Abdul Gaffar
+%% ------------------------------------------------------------------EMC-ATWS------------------------------------------------------------------------------
 clear all;
 close all;
 
@@ -25,7 +32,7 @@ WindowMatrix = EsperanceDataset.Settings.HRR.Win_Func;
 sb_Calib_Matrix =  EsperanceDataset.Settings.HRR.corr_filter_vector;
 
 HRR_profiles = ifft(EsperanceDataset.Settings.HRR.TgtBin_velcomp_peak.*WindowMatrix.*sb_Calib_Matrix).';
-%HRR_profiles = HRR_profiles(185:587,:);
+HRR_profiles = HRR_profiles(185:587,:);
 xaxis = RadarDataset.Range_axis;
 yaxis = (1:1:size(RadarDataset.HRR_profiles,1));
 % Dataset = load('Altera_CWLFM_Dataset.mat');
@@ -35,8 +42,8 @@ yaxis = (1:1:size(RadarDataset.HRR_profiles,1));
 
 N = size(HRR_profiles,2);
 M = size(HRR_profiles,1);
-window_range = [0.5,0.8,1.6];         %[0.2,0.45,0.75,1.2]
-for range = 1:3
+window_range = [0.3,0.8];         %[0.2,0.45,0.75,1.2]
+for range = 1:2
     window = window_range(range);
     fs = 154;
     PRF = fs;
@@ -382,13 +389,18 @@ else
         %% Entropy
         N = B/(sum(sum(B,1)));
         Entropy = - sum(sum(N.*log(N),1));
-        %% perfect
+        %% --------------------------------IT-------------------------------------------
+        %Locate bin with max energy
         [max_down_range_energy, energy_cell_index] = max(sum(20*log10(B)));
+        %Select bandwidth B_ZDT
         B_zdt = round(30*(size(B,1)/PRF));
         zero_doppler = size(B,1)/2;
+        %Sum negative and positive frequencies
         negative_freqs = sum(20*log10(B(zero_doppler-B_zdt:zero_doppler,energy_cell_index)));
         positive_freqs = sum(20*log10(B(zero_doppler:zero_doppler+B_zdt,energy_cell_index)));
+        %Select energy threshold
         E_threshold = 350; %dB;
+        %Check to see if image contains both negative and positve frequencies 
         Energy_test = abs(negative_freqs - positive_freqs);
         if Energy_test < E_threshold
             IT = 0;
