@@ -17,7 +17,7 @@ c = 299792458;
 % % Tigress_TURN_1_P728_B1_STC76_HRR : Checked
 % % Tigress_TURN_2_P728_B1_STC76_HRR : Checked
 %
-EsperanceDataset = load('Esp_CAP77-58INB_1_P728_B1_STC76_HRR ');
+EsperanceDataset = load('Tigress_INB_1_P727_B1_STC88_HRR');
 %EsperanceDataset = load('Esp_CAP77-51TURN_1min_rev_1_P728_B1_STC76_HRR');
 % Obtain the relevant data from the Esperance Dataset
 RadarDataset.HRR_profiles = EsperanceDataset.Settings.HRR.HRR_calib_velcomppeak_win.';
@@ -32,7 +32,7 @@ WindowMatrix = EsperanceDataset.Settings.HRR.Win_Func;
 sb_Calib_Matrix =  EsperanceDataset.Settings.HRR.corr_filter_vector;
 
 HRR_profiles = ifft(EsperanceDataset.Settings.HRR.TgtBin_velcomp_peak.*WindowMatrix.*sb_Calib_Matrix).';
-HRR_profiles = HRR_profiles(185:587,:);
+%HRR_profiles = HRR_profiles(185:587,:);
 xaxis = RadarDataset.Range_axis;
 yaxis = (1:1:size(RadarDataset.HRR_profiles,1));
 % Dataset = load('Altera_CWLFM_Dataset.mat');
@@ -42,8 +42,8 @@ yaxis = (1:1:size(RadarDataset.HRR_profiles,1));
 
 N = size(HRR_profiles,2);
 M = size(HRR_profiles,1);
-window_range = [0.3,0.8];         %[0.2,0.45,0.75,1.2]
-for range = 1:2
+window_range = [0.5,0.8,1.6];         %[0.2,0.45,0.75,1.2]
+for range = 1:3
     window = window_range(range);
     fs = 154;
     PRF = fs;
@@ -52,9 +52,9 @@ for range = 1:2
     CPTWL = roundn(window*fs,-2);
     nfft = CPTWL;               % Numeber off fft points
     win = kaiser(CPTWL);        % Window Function
-    factor = 0.75;               % Overlap factor
+    factor = 0.75;              % Overlap factor
     overlap = factor*CPTWL;     % Overlap samples
-    polyorder = 2;
+    polyorder = 3;
     n = 6;
     wlen = length(win);
     f = (wlen/2:1:(wlen/2-1))*fs/wlen;
@@ -217,10 +217,11 @@ for i = 1:size(Optimum_matrix,2)
     f = (-wlen/2:1:(wlen/2-1))*PRF/wlen;
     figure;
     imagesc(Range_axis,f,20*log10(abs(ISAR_new)));
-     title(sprintf("Image Rank = %0.5g, CenterTime = %0.5g s,  \n Entropy = %0.5g ,Contrast = %0.5g, \n Optimum CPTWL = %0.5g, Initial CPTWL = %0.5g ",counter,CentreProfile_time, oentropy, Contrast, CPTWL,roundn(Optimum_matrix(5,index_1)*1/PRF,-2))); % Abdul Gaffar
+     title(sprintf("The EMC-ATWS , \n Tau = %0.5g s ,Contrast = %0.5g, \n Optimum CPTWL = %0.5g, Initial CPTWL = %0.5g ",CentreProfile_time, Contrast,CPTWL,roundn(Optimum_matrix(5,index_1)*1/PRF,-2))); % Abdul Gaffar
     colormap(flipud(gray));
     ylabel('Doppler Frequency (Hz)');
     xlabel('Range (m)');
+    set(gcf, 'Color', 'None')
     colorbar;
     axis xy;
     Optimum_matrix(4,index_1) = 100000;

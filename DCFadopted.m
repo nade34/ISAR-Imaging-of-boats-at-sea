@@ -217,8 +217,9 @@ for i = 1:size(Optimum_matrix,2)
     f = (-wlen/2:1:(wlen/2-1))*PRF/wlen;
     figure;
     imagesc(Range_axis,f,20*log10(abs(ISAR_new)));
-    title(sprintf("Tau = %0.5g s ,Contrast = %0.5g, \n Optimum CPTWL = %0.5g, Initial CPTWL = %0.5g ",CentreProfile_time, Contrast, 0.43,roundn(Optimum_matrix(5,index_1)*1/PRF,-2))); % Abdul Gaffar
+    title(sprintf("DCF Adapted EMC-ATWS , \n Tau = %0.5g s ,Contrast = %0.5g, \n Optimum CPTWL = %0.5g, Initial CPTWL = %0.5g ",CentreProfile_time, Contrast,CPTWL,roundn(Optimum_matrix(5,index_1)*1/PRF,-2))); % Abdul Gaffar
     colormap(flipud(gray));
+    set(gcf, 'Color', 'None')
     ylabel('Doppler Frequency (Hz)');
     xlabel('Range (m)');
     colorbar;
