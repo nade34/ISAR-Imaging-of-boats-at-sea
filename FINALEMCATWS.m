@@ -74,6 +74,9 @@ overlap_matrix
 counter = 1;
 non_overlap(1:2,counter) = 0;
 int_length = size(overlap_matrix,2);
+%% ----------------------------------------------------------------Overlap Test----------------------------------------------------------------------
+% This piece of code works by locating overlapping intervals and retains
+% the intervals with the longest CPTWL
 for i = 1:int_length
     non_overlap
     index = overlap_matrix(1,1);
@@ -155,6 +158,8 @@ finalf
 finalISARImages (Autofocus,win, overlap, nfft, PRF,xaxis,factor,finalf)
 function finalISARImages (y,win, overlap, nfft, PRF,Range_axis,factor,Optimum_matrix)
 counter = 1;
+%% -------------------------------------------------------------Image Rank------------------------------------------------------------------------
+% Here the final set of images are ranked via the entropy value stored from the optimum_matrix.
 for i = 1:size(Optimum_matrix,2)
     [max_contrast,index_1] = min(Optimum_matrix(4,:))
     ylen = size(y,1);                                                                            % Signal Length
@@ -166,10 +171,10 @@ for i = 1:size(Optimum_matrix,2)
     frames = 1+floor((ylen-wlen)/(hop));
     %% Executing the STFT to generate multiple ISAR Images
     %% STFT
-    StartProfile = 1+(Optimum_matrix(1,index_1)-1)*hop;                                                 % Abdul Gaffar
-    StopProfile = wlen+(Optimum_matrix(1,index_1)-1)*hop;                                               % Abdul Gaffar
-    CentreProfile = (StartProfile + StopProfile)/2;                                                     % Abdul Gaffar
-    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);                                                % Abdul Gaffar
+    StartProfile = 1+(Optimum_matrix(1,index_1)-1)*hop;                                                 
+    StopProfile = wlen+(Optimum_matrix(1,index_1)-1)*hop;                                               
+    CentreProfile = (StartProfile + StopProfile)/2;                                                     
+    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);                                                
     Ess = y(StartProfile:StopProfile,:).*kaiser(wlen).*repmat(kaiser(wlen),1,size(y,2));                % windowing of the sampled data that moves 'overlap' samples for respective frame
     Enew = Ess;
     %% Compute ISAR image
@@ -339,14 +344,15 @@ for i = 0:frames-1
     N = B/(sum(sum(B,1)));
     Entropy = -sum(sum(N.*log(N),1));
 end
-%% Locating peaks of contrast matrix
+%% ----------------------------------------------------------- Locating peaks of contrast matrix-----------------------------------------------
 counter = 3;
 increment = 1;
 peak_matrix(1:2,:) = 0;
 plot(center_instance,contrast_matrix);
-ylabel('Contrast of each image instance')
+set(gcf, 'Color', 'None')
+ylabel('Contrast')
 xlabel('Image instances, \tau, (s)');
-title('Peak contrast analysis criteria') 
+title('Peak contrast analysis') 
 while(1)
     if counter > length(contrast_matrix)-2
         break;
@@ -423,6 +429,9 @@ else
 end
 
 end
+%% ---------------------------------------------------------Window length estimator-------------------------------------------------------------
+% This algorithm adjusts the CPTWL by 2p factor until the maximum contrast
+% posibble is located. 
 function optimum_matrix = CPTWL_optV3(y,win, overlap, nfft, PRF,Range_axis,indexes,factor,n)
 flag = 1;
 index = indexes;
@@ -453,7 +462,7 @@ if Test > ylen
     optimum_matrix(5,flag) = wlen;
     invert = 'n';
 end
-%Image_print1(PRF,wlen,ISAR,'n',Entropy,new_contrast,Range_axis,CentreProfile_time,lol)
+
 if Test < ylen
     [new_contrast,StopProfile,ISAR,Entropy,CentreProfile_time,second,oentropy,ISAR_new] = image_generation (nlen, hop, 'n',y,index,PRF);
     Entropy
@@ -463,7 +472,7 @@ if Test < ylen
     new_cmatrix(1,1) = original;
     new_cmatrix(2,1) = wlen;
     new_cmatrix(2,2) = nlen;
-    %% Determin if contrast increases or decreases with the addition of 2n to the window length.
+    %% Determine if contrast increases or decreases with the addition of 2n to the window length.
     if original < second
         while 1
             if h_counter == n
@@ -505,9 +514,9 @@ if Test < ylen
         end
     else
         h_counter
-        nlen = wlen - (2*(n-h_counter)*h);                                            % Increase window size by 2n
+        nlen = wlen - (2*(n-h_counter)*h);                                      % Increase window size 
         overlap = factor*nlen;                                                  % Calculate new overlap to factor the size of the new window length
-        hop = nlen-overlap;                                                     % Abdul Gaffar
+        hop = nlen-overlap;                                                    
         while 1
             if h_counter == n
                 break;
@@ -700,19 +709,13 @@ for row = 1:size(ISAR_new,1)
         end
     end
 end
-%% ---------------- Removal of 0 Doppler -----------------------------
-%% Zero Doppler Removal
-size(ISAR,1);
-zero_doppler = size(ISAR,1)/2;
-B = abs(ISAR).^2;
-% Bandwidth to ignore
-B_zdm = round(40*(size(B,1)/PRF))    ;
 
-        B = abs(B).^2;
-        C = mean(mean(B,1));
-        D = B - C;
-        E = sqrt((mean(mean(D.^2,1))));
-        ocontrast = E/C;
+%% Contrast
+B = abs(B).^2;
+C = mean(mean(B,1));
+D = B - C;
+E = sqrt((mean(mean(D.^2,1))));
+ocontrast = E/C;
 
 %% Entropy
 N = B/(sum(sum(B,1)));

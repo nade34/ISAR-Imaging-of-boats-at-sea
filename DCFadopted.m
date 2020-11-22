@@ -18,7 +18,7 @@ c = 299792458;
 % % Tigress_TURN_1_P728_B1_STC76_HRR : Checked
 % % Tigress_TURN_2_P728_B1_STC76_HRR : Checked
 %
-EsperanceDataset = load('Esp_CAP77-58INB_1_P728_B1_STC76_HRR ');
+EsperanceDataset = load('Tigress_INB_1_P727_B1_STC88_HRR');
 %EsperanceDataset = load('Esp_CAP77-51TURN_1min_rev_1_P728_B1_STC76_HRR');
 % Obtain the relevant data from the Esperance Dataset
 RadarDataset.HRR_profiles = EsperanceDataset.Settings.HRR.HRR_calib_velcomppeak_win.';
@@ -44,7 +44,7 @@ yaxis = (1:1:size(RadarDataset.HRR_profiles,1));
 N = size(HRR_profiles,2);
 M = size(HRR_profiles,1);
 window_range = [0.5,0.8,1.6];         %[0.2,0.45,0.75,1.2]
-for range = 1:3
+for range = 1:1
     window = window_range(range);
     fs = 154;
     PRF = fs;
@@ -55,7 +55,7 @@ for range = 1:3
     win = kaiser(CPTWL);        % Window Function
     factor = 0.75;               % Overlap factor
     overlap = factor*CPTWL;     % Overlap samples
-    polyorder = 2;
+    polyorder = 3;
     n = 6;
     wlen = length(win);
     f = (wlen/2:1:(wlen/2-1))*fs/wlen;
@@ -75,6 +75,9 @@ overlap_matrix
 counter = 1;
 non_overlap(1:2,counter) = 0;
 int_length = size(overlap_matrix,2);
+%% ----------------------------------------------------------------Overlap Test---------------------------------------------------------------
+% This piece of code works by locating overlapping intervals and retains
+% the intervals with the longest CPTWL
 for i = 1:int_length
     non_overlap
     index = overlap_matrix(1,1);
@@ -155,6 +158,8 @@ end
 finalISARImages (Autofocus,win, overlap, nfft, PRF,xaxis,factor,finalf)
 function finalISARImages (y,win, overlap, nfft, PRF,Range_axis,factor,Optimum_matrix)
 counter = 1;
+%% -------------------------------------------------------------Image Rank------------------------------------------------------------------------
+% Here the final set of images are ranked via the entropy value stored from the optimum_matrix. 
 for i = 1:size(Optimum_matrix,2)
     [max_contrast,index_1] = min(Optimum_matrix(4,:));
     ylen = size(y,1);                                                                            % Signal Length
@@ -318,9 +323,7 @@ for i = 0:frames-1
     Enew = Ess;
     %% Compute ISAR image
     ISAR = fftshift(fft(Enew,[],1),1);
-    %% Contrast
-    %% ---------------- Removal of 0 Doppler -----------------------------
-        %% Compute 
+    %% --------------------------------------------------------------DCF Estimation-------------------------------------------------------------
     energy = abs(ISAR).^2;
     overall_energy = sum(energy,1);
     [maz_energy,energy_index]= max(overall_energy);
@@ -374,10 +377,11 @@ end
 counter = 3;
 increment = 1;
 peak_matrix(1:2,:) = 0;
-% plot(center_instance(14:23),contrast_matrix(14:23));
-% ylabel('Absolute value of Doppler centroid frequency (Hz)')
-% xlabel('Image instances, \tau, (s)');
-% title('DCF peak analysis criteria') 
+plot(center_instance(5:15),contrast_matrix(5:15));
+set(gcf, 'Color', 'None')
+ylabel('Doppler centroid frequency (Hz)')
+ xlabel('Image instances, \tau, (s)');
+ title('DCF estimation plot') 
 while(1)
     if counter > length(contrast_matrix)-2
         break;
@@ -421,13 +425,13 @@ else
         %% Entropy
         N = B/(sum(sum(B,1)));
         Entropy = - sum(sum(N.*log(N),1));
-        %% perfect
+        %% Image Test
         [max_down_range_energy, energy_cell_index] = max(sum(20*log10(B)));
         B_zdt = round(30*(size(B,1)/PRF));
         zero_doppler = size(B,1)/2;
         negative_freqs = sum(20*log10(B(zero_doppler-B_zdt:zero_doppler,energy_cell_index)));
         positive_freqs = sum(20*log10(B(zero_doppler:zero_doppler+B_zdt,energy_cell_index)));
-        E_threshold = 8; %dB;
+        E_threshold = 350; %dB
         Energy_test = abs(negative_freqs - positive_freqs);
         if Energy_test < E_threshold
             IT = 0;
@@ -449,6 +453,9 @@ else
 end
 
 end
+%% ---------------------------------------------------------Window length estimator-------------------------------------------------------------
+% This algorithm adjusts the CPTWL by 2p factor until the maximum contrast
+% posibble is located.
 function optimum_matrix = CPTWL_optV3(y,win, overlap, nfft, PRF,Range_axis,indexes,factor,n)
 flag = 1;
 index = indexes;
