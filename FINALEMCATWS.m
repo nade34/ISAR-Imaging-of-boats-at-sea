@@ -316,10 +316,10 @@ centre_time_matrix = zeros(1,frames);
 %% Executing the STFT to generate multiple ISAR Images
 for i = 0:frames-1
     %% STFT
-    StartProfile = 1+i*hop;                                 % Abdul Gaffar
-    StopProfile = wlen+i*hop;                               % Abdul Gaffar
-    CentreProfile = (StartProfile + StopProfile)/2;         % Abdul Gaffar
-    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);    % Abdul Gaffar
+    StartProfile = 1+i*hop;                                 
+    StopProfile = wlen+i*hop;                               
+    CentreProfile = (StartProfile + StopProfile)/2;       
+    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);    
     centre_time_matrix(1,i+1) = CentreProfile_time;
     Ess = y(StartProfile:StopProfile,:).*kaiser(wlen).*repmat(kaiser(wlen),1,size(y,2));       % windowing of the sampled data that moves 'overlap' samples for respective frame
     Enew = Ess;
@@ -421,9 +421,7 @@ else
             overlap_matrix(3,lmao) = StartProfile;
             overlap_matrix(4,lmao) = StopProfile;
             overlap_matrix(5,lmao) = wlen;
-            
             lmao =lmao+1;
-            %cakes
         end
     end
 end
@@ -505,7 +503,6 @@ if Test < ylen
             end
             %% Storing all the contrasts as window length increases
             [new_contrast,StopProfile,ISAR,Entropy,CentreProfile_time,ocontrast,oentropy,ISAR_new] = image_generation (nlen, hop, 'n',y,index,PRF);
-            %Image_print1(PRF,wlen,ISAR,'n',Entropy,new_contrast,Range_axis,CentreProfile_time,index);
             new_cmatrix(1,counter+2) = ocontrast
             new_cmatrix(2,counter+2) = nlen
             if new_contrast < new_cmatrix(1,counter+1)
@@ -566,7 +563,6 @@ if Test < ylen
     overlap = factor*wlen;
     hop = wlen-overlap;
     [new_contrast,StopProfile,ISAR,Entropy,CentreProfile_time,ocontrast,oentropy,ISAR_new] = image_generation (wlen, hop, 'n',y,index,PRF);
-    %Image_print1(PRF,wlen,ISAR,'n',Entropy,new_contrast,Range_axis,CentreProfile_time,index);
     [max_contrast,apple] = max(new_cmatrix(1,:));
     nlen = new_cmatrix(2,apple)
     overlap = factor*nlen
@@ -580,7 +576,6 @@ if Test < ylen
     invert = 'n';
     optimum_matrix
 end
-%Image_print(PRF,nlen,ISAR_new,invert,Entropy,ocontrast,Range_axis,CentreProfile_time,index);
 
 
     function Image_print(PRF,wlen,ISAR,invert,Entropy,new_contrast,Range_axis,CentreProfile_time,lol)

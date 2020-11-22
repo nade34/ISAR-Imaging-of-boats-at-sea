@@ -140,7 +140,6 @@ else
     average_contrast = mean(optimum_matrix(3,:));
 end
 for final = 1:size(optimum_matrix,2)
-    %if optimum_matrix(3,final)> average_contrast
     redf = redf+1;
     nlen = optimum_matrix(2,final);
     index = optimum_matrix(1,final);
@@ -153,8 +152,8 @@ for final = 1:size(optimum_matrix,2)
     finalf(3,redf) = ocontrast;
     finalf(4,redf) = oentropy;
     finalf(5,redf) = optimum_matrix(5,final);
-     %end
 end
+
 finalISARImages (Autofocus,win, overlap, nfft, PRF,xaxis,factor,finalf)
 function finalISARImages (y,win, overlap, nfft, PRF,Range_axis,factor,Optimum_matrix)
 counter = 1;
@@ -171,10 +170,10 @@ for i = 1:size(Optimum_matrix,2)
     frames = 1+floor((ylen-wlen)/(hop));
     %% Executing the STFT to generate multiple ISAR Images
     %% STFT
-    StartProfile = 1+(Optimum_matrix(1,index_1)-1)*hop;                                                 % Abdul Gaffar
-    StopProfile = wlen+(Optimum_matrix(1,index_1)-1)*hop;                                               % Abdul Gaffar
-    CentreProfile = (StartProfile + StopProfile)/2;                                                     % Abdul Gaffar
-    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);                                                % Abdul Gaffar
+    StartProfile = 1+(Optimum_matrix(1,index_1)-1)*hop;                                                 
+    StopProfile = wlen+(Optimum_matrix(1,index_1)-1)*hop;                                               
+    CentreProfile = (StartProfile + StopProfile)/2;                                                    
+    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);                                                
     Ess = y(StartProfile:StopProfile,:).*kaiser(wlen).*repmat(kaiser(wlen),1,size(y,2));                % windowing of the sampled data that moves 'overlap' samples for respective frame
     Enew = Ess;
     %% Compute ISAR image
@@ -472,7 +471,7 @@ h_counter = counter;
 h = 1;
 nlen = wlen + (2*(n-counter)*h);                                        % Increase window size by 2n
 overlap = factor*nlen;                                                  % Calculate new overlap to factor the size of the new window length
-hop = nlen-overlap;                                                     % Abdul Gaffar
+hop = nlen-overlap;                                                     
 Test = nlen+(index-1)*hop;
 if Test > ylen
     wlen = length(win);
@@ -486,7 +485,7 @@ if Test > ylen
     optimum_matrix(5,flag) = wlen;
     invert = 'n';
 end
-%Image_print1(PRF,wlen,ISAR,'n',Entropy,new_contrast,Range_axis,CentreProfile_time,lol)
+
 if Test < ylen
     [new_contrast,StopProfile,ISAR,Entropy,CentreProfile_time,second,oentropy,ISAR_new] = image_generation (nlen, hop, 'n',y,index,PRF);
     Entropy
@@ -529,7 +528,6 @@ if Test < ylen
             end
             %% Storing all the contrasts as window length increases
             [new_contrast,StopProfile,ISAR,Entropy,CentreProfile_time,ocontrast,oentropy,ISAR_new] = image_generation (nlen, hop, 'n',y,index,PRF);
-            %Image_print1(PRF,wlen,ISAR,'n',Entropy,new_contrast,Range_axis,CentreProfile_time,index);
             new_cmatrix(1,counter+2) = ocontrast
             new_cmatrix(2,counter+2) = nlen
             if new_contrast < new_cmatrix(1,counter+1)
@@ -538,9 +536,9 @@ if Test < ylen
         end
     else
         h_counter
-        nlen = wlen - (2*(n-h_counter)*h);                                            % Increase window size by 2n
+        nlen = wlen - (2*(n-h_counter)*h);                                      % Increase window size
         overlap = factor*nlen;                                                  % Calculate new overlap to factor the size of the new window length
-        hop = nlen-overlap;                                                     % Abdul Gaffar
+        hop = nlen-overlap;                                                     
         while 1
             if h_counter == n
                 break;
@@ -555,7 +553,6 @@ if Test < ylen
             [new_contrast,StopProfile,ISAR,Entropy,CentreProfile_time,ocontrast,oentropy,ISAR_new] = image_generation (nlen, hop, 'n',y,index,PRF);
             new_cmatrix(1,counter+3) = ocontrast
             new_cmatrix(2,counter+3) = nlen
-            %Image_print1(PRF,wlen,ISAR,'n',Entropy,new_contrast,Range_axis,CentreProfile_time,index);
             if new_contrast < new_cmatrix(1,counter+2)
                 break
             else
@@ -741,16 +738,16 @@ B_new = abs(ISAR).^2;
 % Bandwidth to ignore
 B_zdm = round(40*(size(B,1)/PRF))    ;
 % looks away from the 0 Doppler going in the positive direction
-        %% ---------------- Removal of 0 Doppler -----------------------------
-        No_ZERO_DOPPLER = ISAR;
-        % Removal of zero Doppler 
-        No_ZERO_DOPPLER((size(ISAR_new,1)/2)-B_zdm:(size(ISAR_new,1)/2)+B_zdm,:) = [];
-        % Recalculate Contrast 
-        B = abs(No_ZERO_DOPPLER).^2;
-        C = mean(mean(B,1));
-        D = B - C;
-        E = sqrt((mean(mean(D.^2,1))));
-        ocontrast = E/C;
+%% ---------------- Removal of 0 Doppler -----------------------------
+No_ZERO_DOPPLER = ISAR;
+% Removal of zero Doppler
+No_ZERO_DOPPLER((size(ISAR_new,1)/2)-B_zdm:(size(ISAR_new,1)/2)+B_zdm,:) = [];
+% Recalculate Contrast
+B = abs(No_ZERO_DOPPLER).^2;
+C = mean(mean(B,1));
+D = B - C;
+E = sqrt((mean(mean(D.^2,1))));
+ocontrast = E/C;
 %% Entropy
 N = B/(sum(sum(B,1)));
 oentropy = -sum(sum(N.*log(N),1));
