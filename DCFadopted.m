@@ -314,10 +314,10 @@ centre_time_matrix = zeros(1,frames);
 %% Executing the STFT to generate multiple ISAR Images
 for i = 0:frames-1
     %% STFT
-    StartProfile = 1+i*hop;                                 % Abdul Gaffar
-    StopProfile = wlen+i*hop;                               % Abdul Gaffar
-    CentreProfile = (StartProfile + StopProfile)/2;         % Abdul Gaffar
-    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);    % Abdul Gaffar
+    StartProfile = 1+i*hop;                                 
+    StopProfile = wlen+i*hop;                               
+    CentreProfile = (StartProfile + StopProfile)/2;        
+    CentreProfile_time = roundn(CentreProfile*1/PRF,-2);    
     centre_time_matrix(1,i+1) = CentreProfile_time;
     Ess = y(StartProfile:StopProfile,:).*kaiser(wlen).*repmat(kaiser(wlen),1,size(y,2));       % windowing of the sampled data that moves 'overlap' samples for respective frame
     Enew = Ess;
